@@ -1,33 +1,59 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
+import { useState, useRef, useEffect } from 'react'
 import './App.css'
 
+declare global {
+  // eslint-disable-next-line @typescript-eslint/no-namespace
+  namespace JSX {
+    interface IntrinsicElements {
+      'e-button': React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>,HTMLElement>
+      'e-input': React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>,HTMLElement>
+    }
+  }
+}
+
 function App() {
+  const eButtonRef = useRef<HTMLButtonElement>(null)
+  const eInputRef = useRef<HTMLInputElement>(null)
   const [count, setCount] = useState(0)
+  const [inputValue, setInputValue] = useState('')
+
+  useEffect(() => {
+    const handleMyEvent = () => {
+      setCount((count) => count + 1)
+    }
+
+    const currentButton = eButtonRef.current
+    currentButton?.addEventListener('click', handleMyEvent)
+
+    return () => {
+      currentButton?.removeEventListener('click', handleMyEvent)
+    }
+  }, [])
+
+  useEffect(() => {
+    const currentInput = eInputRef.current
+
+    currentInput?.addEventListener('update:modelValue', (event: any) => {
+      console.log(event.detail)
+      setInputValue(event.detail[0])
+    })
+
+    return () => {
+      currentInput?.removeEventListener('click', () => {})
+    }
+  }, [])
 
   return (
     <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
       <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
+      <div className="p-4">
+        <e-button ref={eButtonRef}>
+          Hola mundo { count }
+        </e-button>
+
+        <e-input ref={eInputRef} placeholder="Some"></e-input>
+        { inputValue }
       </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
     </>
   )
 }
